@@ -6,19 +6,19 @@ import rateLimit from 'express-rate-limit';
 import cookieParser from 'cookie-parser';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import connectDB from '../config/database.js';
+import connectDB from './config/database.js';
 
 // Route imports
-import authRoutes from '../routes/auth.js';
-import vendorRoutes from '../routes/vendor.js';
-import inquiryRoutes from '../routes/inquiry.js';
-import bookingRoutes from '../routes/booking.js';
-import dashboardRoutes from '../routes/dashboard.js';
-import notificationRoutes from '../routes/notification.js';
+import authRoutes from './routes/auth.js';
+import vendorRoutes from './routes/vendor.js';
+import inquiryRoutes from './routes/inquiry.js';
+import bookingRoutes from './routes/booking.js';
+import dashboardRoutes from './routes/dashboard.js';
+import notificationRoutes from './routes/notification.js';
 
 // Middleware imports
-import { errorHandler, notFoundHandler } from '../middleware/errorHandler.js';
-import { handleMulterError } from '../middleware/upload.js';
+import { errorHandler, notFoundHandler } from './middleware/errorHandler.js';
+import { handleMulterError } from './middleware/upload.js';
 
 // Load environment variables
 dotenv.config();
@@ -59,7 +59,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // Static files for uploads
-app.use('/uploads', express.static(path.join(__dirname, '..', 'uploads')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // API Routes
 app.use('/api/auth', authRoutes);

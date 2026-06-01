@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 import { vendorApi } from '@/api/client';
 import { formatCurrency, cn } from '@/lib/utils';
-import { Card, Badge, Button, Input, Skeleton, EmptyState, Dialog } from '@/components/ui';
+import { Card, Badge, Button, Skeleton, EmptyState, Dialog } from '@/components/ui';
 import { useToast } from '@/components/ui';
 
 const serviceSchema = z.object({
@@ -275,17 +275,20 @@ export default function Services() {
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <Input
-              label="Service Name"
-              placeholder="Enter service name"
-              error={errors.name?.message}
-              {...register('name')}
-            />
+            <div className="space-y-1.5">
+              <label htmlFor="name" className="block text-sm font-medium text-text-secondary">Service Name *</label>
+              <input
+                id="name"
+                type="text"
+                placeholder="Enter service name"
+                className="input-field w-full"
+                {...register('name')}
+              />
+              {errors.name && <p className="text-sm text-red-400">{errors.name.message}</p>}
+            </div>
 
             <div className="space-y-1.5">
-              <label className="block text-sm font-medium text-text-secondary">
-                Description
-              </label>
+              <label className="block text-sm font-medium text-text-secondary">Description</label>
               <textarea
                 placeholder="Enter service description"
                 rows={3}
@@ -295,21 +298,29 @@ export default function Services() {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <Input
-                label="Duration (minutes)"
-                type="number"
-                placeholder="60"
-                error={errors.duration_minutes?.message}
-                {...register('duration_minutes', { valueAsNumber: true })}
-              />
+              <div className="space-y-1.5">
+                <label htmlFor="duration_minutes" className="block text-sm font-medium text-text-secondary">Duration (minutes)</label>
+                <input
+                  id="duration_minutes"
+                  type="number"
+                  placeholder="60"
+                  className="input-field w-full"
+                  {...register('duration_minutes', { valueAsNumber: true })}
+                />
+                {errors.duration_minutes && <p className="text-sm text-red-400">{errors.duration_minutes.message}</p>}
+              </div>
 
-              <Input
-                label="Price"
-                type="number"
-                placeholder="0"
-                error={errors.price?.message}
-                {...register('price', { valueAsNumber: true })}
-              />
+              <div className="space-y-1.5">
+                <label htmlFor="price" className="block text-sm font-medium text-text-secondary">Price *</label>
+                <input
+                  id="price"
+                  type="number"
+                  placeholder="0"
+                  className="input-field w-full"
+                  {...register('price', { valueAsNumber: true })}
+                />
+                {errors.price && <p className="text-sm text-red-400">{errors.price.message}</p>}
+              </div>
             </div>
 
             <div className="flex items-center gap-3">

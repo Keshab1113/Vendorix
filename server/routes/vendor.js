@@ -74,7 +74,7 @@ router.delete('/packages/:id', deletePackage);
 
 // Gallery
 router.get('/gallery', getGallery);
-router.post('/gallery', upload.single('image'), uploadGalleryImage);
+router.post('/gallery', upload.array('images', 10), uploadGalleryImage);
 router.delete('/gallery/:id', deleteGalleryImage);
 
 // Availability

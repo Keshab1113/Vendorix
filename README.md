@@ -1,290 +1,315 @@
 # Vendorix
 
-A premium SaaS-style Vendor Booking Dashboard built using the MERN Stack, MySQL, Tailwind CSS, Shadcn/UI, and TanStack Query. Vendorix helps vendors manage bookings, event inquiries, analytics, and business operations through a modern, responsive, and production-ready platform.
+> A premium SaaS-style Vendor Booking Dashboard built with the MERN Stack
+
+![React](https://img.shields.io/badge/React-18.2.0-61DAFB?style=flat-square&logo=react)
+![Node.js](https://img.shields.io/badge/Node.js-20+-339933?style=flat-square&logo=node.js)
+![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-47A248?style=flat-square&logo=mongodb)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC?style=flat-square&logo=tailwind-css)
+![Vite](https://img.shields.io/badge/Vite-5.4-646CFF?style=flat-square&logo=vite)
+
+Vendorix helps vendors manage bookings, event inquiries, customer requests, analytics, and business operations through a modern, scalable, and production-ready dashboard experience.
 
 ---
 
-## 🚀 Features
+## ✨ Features
 
 ### 🔐 Authentication System
-
-* JWT Authentication
-* Login & Signup
-* Forgot & Reset Password
-* Protected Routes
-* Role-Based Access Control
-* Secure Password Hashing
+- JWT Authentication with httpOnly cookies
+- Login & Signup with form validation
+- Forgot & Reset Password
+- Protected Routes with middleware
+- Password Hashing with Bcrypt
 
 ### 👤 Vendor Profile Management
-
-* Vendor Business Profiles
-* Portfolio & Gallery Uploads
-* Service & Pricing Management
-* Availability Calendar
-* Editable Profile Settings
+- Business Profile Management
+- Profile Image Upload with Multer
+- Portfolio & Gallery Uploads
+- Services & Pricing Packages
+- Availability Scheduling
 
 ### 📅 Event Inquiry Management
-
-* Manage Event Requests
-* Inquiry Status Tracking
-* Accept / Reject Bookings
-* Search & Filter Inquiries
-* Pagination & Real-Time Updates
+- Manage Event Inquiries
+- Accept / Reject / Confirm Requests
+- Status Tracking (Pending, Contacted, Confirmed, Rejected, Completed)
+- Search & Filters
+- Pagination
 
 ### 📊 Dashboard Analytics
+- Total Bookings Overview
+- Revenue Analytics with Charts
+- Monthly Earnings Tracking
+- Inquiry Conversion Rate
+- Upcoming Events
+- Customer Growth Analytics
 
-* Revenue Insights
-* Booking Statistics
-* Inquiry Conversion Rates
-* Upcoming Events
-* Interactive Charts & Graphs
+### 🔔 Notification System
+- Real-Time Notifications
+- Mark as Read/Unread
+- Delete Notifications
+- Notification Types (Inquiry, Booking, System)
 
-### 🎨 Modern SaaS UI
-
-* Fully Responsive Design
-* Dark Theme
-* Premium Dashboard Layout
-* Smooth Animations
-* Shadcn/UI Components
-* Mobile Optimized
-
----
-
-# 🛠️ Tech Stack
-
-## Frontend
-
-* React.js
-* Vite
-* Tailwind CSS
-* Shadcn/UI
-* TanStack Query
-* React Router DOM
-* Axios
-* React Hook Form
-* Zod
-* Framer Motion
-
-## Backend
-
-* Node.js
-* Express.js
-* MySQL
-* JWT Authentication
-* Bcrypt
-* Multer
+### 🎨 Premium SaaS UI
+- Fully Responsive Design (Mobile, Tablet, Desktop)
+- Dark Theme
+- Glassmorphism Effects
+- Smooth Animations with Framer Motion
+- Modern Dashboard Layout
 
 ---
 
-# 📂 Project Structure
+## 🛠️ Tech Stack
 
-## Frontend
+### Frontend
+| Technology | Purpose |
+|------------|---------|
+| React 18 | UI Library |
+| Vite | Build Tool |
+| Tailwind CSS | Styling |
+| TanStack Query | Data Fetching |
+| React Router DOM | Routing |
+| React Hook Form + Zod | Form Validation |
+| Framer Motion | Animations |
+| Lucide React | Icons |
+| Recharts | Charts |
 
-```bash
-client/
-├── src/
-│   ├── api/
-│   ├── components/
-│   ├── hooks/
-│   ├── layouts/
-│   ├── pages/
-│   ├── routes/
-│   ├── services/
-│   ├── store/
-│   ├── styles/
-│   ├── types/
-│   ├── utils/
-│   └── main.jsx
+### Backend
+| Technology | Purpose |
+|------------|---------|
+| Node.js | Runtime |
+| Express.js | Web Framework |
+| MongoDB + Mongoose | Database |
+| JWT | Authentication |
+| Bcrypt | Password Hashing |
+| Multer | File Uploads |
+| Zod | Server-side Validation |
+
+---
+
+## 📂 Project Structure
+
+```
+vendorix/
+├── client/                    # React Frontend
+│   ├── src/
+│   │   ├── api/              # API client configuration
+│   │   ├── components/       # Reusable UI components
+│   │   │   └── ui/          # Base UI components (Button, Input, Card, etc.)
+│   │   ├── hooks/           # Custom React hooks
+│   │   ├── layouts/         # Page layouts
+│   │   ├── lib/             # Utilities and validations
+│   │   ├── pages/           # Page components
+│   │   │   ├── auth/        # Authentication pages
+│   │   │   ├── dashboard/   # Dashboard pages
+│   │   │   └── settings/    # Settings pages
+│   │   ├── routes/          # Route configurations
+│   │   ├── services/         # API service functions
+│   │   ├── store/           # Zustand state management
+│   │   ├── styles/          # Global styles
+│   │   └── main.jsx         # Entry point
+│   ├── index.html
+│   ├── package.json
+│   └── vite.config.js
+│
+├── server/                   # Express Backend
+│   ├── config/              # Configuration files
+│   │   └── database.js     # MongoDB connection
+│   ├── controllers/         # Route controllers
+│   ├── database/            # Database setup scripts
+│   ├── middleware/          # Express middleware
+│   ├── models/              # Mongoose models
+│   ├── routes/              # API routes
+│   ├── services/            # Business logic
+│   ├── utils/               # Utility functions
+│   ├── validators/          # Zod validation schemas
+│   ├── uploads/             # Uploaded files
+│   ├── index.js             # Server entry point
+│   └── package.json
+│
+├── README.md
+└── package.json             # Root package.json (optional)
 ```
 
-## Backend
-
-```bash
-server/
-├── controllers/
-├── routes/
-├── middleware/
-├── models/
-├── services/
-├── validators/
-├── config/
-├── database/
-├── uploads/
-├── utils/
-└── server.js
-```
-
 ---
 
-# ⚡ Installation
+## ⚡ Quick Start
 
-## Clone Repository
+### Prerequisites
+- Node.js 18+ installed
+- MongoDB Atlas account or local MongoDB
+
+### 1. Clone the Repository
 
 ```bash
 git clone https://github.com/your-username/vendorix.git
 cd vendorix
 ```
 
----
-
-## Frontend
-
-```bash
-npm install
-npm run dev      # Development
-npm run build    # Production build
-```
-
-## Backend
+### 2. Backend Setup
 
 ```bash
 cd server
 npm install
-npm run dev      # Development
-npm start        # Production
 ```
 
-## Database Setup
-
-1. Create MySQL database:
-```bash
-mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS vendorix;"
-```
-
-2. Initialize tables and seed data:
-```bash
-cd server
-npm run seed
-```
-
----
-
-# 🗄️ Environment Variables
-
-Create a `.env` file inside the server folder.
+Create a `.env` file in the server folder:
 
 ```env
 PORT=5000
-
-DB_HOST=localhost
-DB_USER=root
-DB_PASSWORD=yourpassword
-DB_NAME=vendorix
-
-JWT_SECRET=your_secret_key
-
-CLIENT_URL=http://localhost:5173
+MONGODB_URI=mongodb+srv://your_mongodb_connection_string
+JWT_SECRET=your-super-secret-jwt-key
+JWT_EXPIRES_IN=15m
+JWT_REFRESH_EXPIRES_IN=7d
+NODE_ENV=development
+FRONTEND_URL=http://localhost:5173
 ```
 
----
+Start the backend server:
 
-# 🧩 Core Modules
+```bash
+npm run dev
+```
 
-* Authentication
-* Vendor Management
-* Inquiry Management
-* Booking System
-* Dashboard Analytics
-* Notifications
-* File Upload System
+Backend runs on: `http://localhost:5000`
 
----
+### 3. Frontend Setup
 
-# 📱 Responsive Design
+```bash
+cd client
+npm install
+npm run dev
+```
 
-Vendorix is fully optimized for:
-
-* Mobile Devices
-* Tablets
-* Laptops
-* Large Screens
+Frontend runs on: `http://localhost:5173`
 
 ---
 
-# 🎯 UI Design
+## 🔑 Demo Credentials
 
-Inspired by modern SaaS platforms like:
+The application comes with pre-filled demo credentials for testing:
 
-* Linear
-* Stripe
-* Notion
-* Vercel
-
-Design includes:
-
-* Dark Theme
-* Glassmorphism
-* Premium Cards
-* Soft Shadows
-* Smooth Animations
-* Elegant Typography
+- **Email:** demo@vendorix.com
+- **Password:** password123
 
 ---
 
-# 🔒 Security Features
+## 🌍 API Endpoints
 
-* JWT Authentication
-* Password Encryption
-* Input Validation
-* Protected APIs
-* Rate Limiting
-* Secure File Uploads
-* CORS Protection
+### Authentication
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/auth/register` | Register new user |
+| POST | `/api/auth/login` | Login user |
+| POST | `/api/auth/logout` | Logout user |
+| GET | `/api/auth/me` | Get current user |
+| POST | `/api/auth/forgot-password` | Request password reset |
+| POST | `/api/auth/reset-password` | Reset password |
+| POST | `/api/auth/refresh` | Refresh access token |
+| PUT | `/api/auth/password` | Change password |
+
+### Vendors
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/vendors/profile` | Get vendor profile |
+| PUT | `/api/vendors/profile` | Update vendor profile |
+| POST | `/api/vendors/avatar` | Upload avatar |
+| GET | `/api/vendors/services` | Get services |
+| POST | `/api/vendors/services` | Create service |
+| PUT | `/api/vendors/services/:id` | Update service |
+| DELETE | `/api/vendors/services/:id` | Delete service |
+| GET | `/api/vendors/packages` | Get packages |
+| POST | `/api/vendors/packages` | Create package |
+| PUT | `/api/vendors/packages/:id` | Update package |
+| DELETE | `/api/vendors/packages/:id` | Delete package |
+
+### Inquiries
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/inquiries` | Get all inquiries |
+| GET | `/api/inquiries/:id` | Get inquiry by ID |
+| POST | `/api/inquiries` | Create inquiry |
+| PUT | `/api/inquiries/:id` | Update inquiry |
+| PATCH | `/api/inquiries/:id/status` | Update status |
+| DELETE | `/api/inquiries/:id` | Delete inquiry |
+
+### Bookings
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/bookings` | Get all bookings |
+| GET | `/api/bookings/:id` | Get booking by ID |
+| POST | `/api/bookings` | Create booking |
+| PUT | `/api/bookings/:id` | Update booking |
+| PATCH | `/api/bookings/:id/status` | Update status |
+| DELETE | `/api/bookings/:id` | Cancel booking |
+
+### Dashboard
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/dashboard/stats` | Get dashboard statistics |
+| GET | `/api/dashboard/analytics` | Get analytics data |
+| GET | `/api/dashboard/revenue` | Get revenue data |
+| GET | `/api/dashboard/recent-activity` | Get recent activity |
+
+### Notifications
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/notifications` | Get notifications |
+| PATCH | `/api/notifications/:id/read` | Mark as read |
+| PATCH | `/api/notifications/read-all` | Mark all as read |
+| DELETE | `/api/notifications/:id` | Delete notification |
 
 ---
 
-# 🚀 Future Enhancements
+## 🔒 Security Features
 
-* Real-Time Chat
-* Socket.IO Notifications
-* Stripe Payments
-* Multi-Vendor Support
-* AI Booking Insights
-* Calendar Scheduling
-* Admin Panel
-* Email Notifications
-
----
-
-# 📸 Screenshots
-
-> Add your dashboard screenshots here after development.
+- JWT Authentication with access/refresh tokens
+- Password hashing with Bcrypt (12 rounds)
+- Protected API routes with middleware
+- Input validation with Zod (client & server)
+- Rate limiting (100 requests per 15 minutes)
+- Helmet.js for security headers
+- CORS configuration
+- MongoDB injection protection
 
 ---
 
-# 🌐 Deployment
+## 📱 Responsive Design
 
-## Frontend
-
-Deploy on:
-
-* Vercel
-* Netlify
-
-## Backend
-
-Deploy on:
-
-* Render
-* Railway
-
-## Database
-
-* MySQL
-* PlanetScale
+Vendorix is fully optimized for all devices:
+- 📱 Mobile (320px+)
+- 📱 Tablet (768px+)
+- 💻 Laptop (1024px+)
+- 🖥️ Desktop (1280px+)
 
 ---
 
-# 👨‍💻 Author
+## 🚀 Deployment
+
+### Frontend
+- **Vercel** (recommended)
+- **Netlify**
+
+### Backend
+- **Render** (recommended)
+- **Railway**
+- **Heroku**
+
+### Database
+- **MongoDB Atlas** (recommended)
+
+---
+
+## 👨‍💻 Author
 
 **Keshab Das**
-
-Frontend & Backend Developer
-MERN Stack Developer
-Passionate about building modern SaaS applications.
+- MERN Stack Developer
+- Frontend & Backend Engineer
+- Passionate about building scalable SaaS applications
 
 ---
 
-# ⭐ Support
+## ⭐ Show Your Support
 
-If you like this project, give it a ⭐ on GitHub and support the development of Vendorix.
+If you find this project useful, please give it a ⭐ on GitHub!
+
+---

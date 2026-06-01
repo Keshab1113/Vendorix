@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { motion } from 'framer-motion';
 import { Eye, EyeOff, ArrowRight, Loader2, CheckCircle } from 'lucide-react';
 import { useAuthStore, useToastStore } from '@/store';
-import { Button, Input } from '@/components/ui';
+import { Button } from '@/components/ui';
 import { registerSchema } from '@/lib/validations';
 
 export default function Signup() {
@@ -29,13 +29,17 @@ export default function Signup() {
   });
 
   const onSubmit = async (data) => {
-    const result = await registerUser(data.email, data.password);
+    try {
+      const result = await registerUser(data.email, data.password, data.confirmPassword);
 
-    if (result.success) {
-      toast.success('Account created successfully!', 'Welcome to Vendorix');
-      navigate('/dashboard');
-    } else {
-      toast.error(result.message || 'Registration failed');
+      if (result?.success) {
+        toast.success('Account created successfully!', 'Welcome to Vendorix');
+        navigate('/dashboard');
+      } else {
+        toast.error(result?.message || 'Registration failed');
+      }
+    } catch (err) {
+      toast.error('Registration failed');
     }
   };
 
@@ -76,22 +80,28 @@ export default function Signup() {
 
           {/* Form */}
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-            <Input
-              label="Email"
-              type="email"
-              placeholder="you@example.com"
-              error={errors.email?.message}
-              {...register('email')}
-            />
+            <div className="space-y-1.5">
+              <label htmlFor="email" className="block text-sm font-medium text-text-secondary">Email</label>
+              <input
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                className="input-field"
+                {...register('email')}
+              />
+              {errors.email && <p className="text-sm text-red-400">{errors.email.message}</p>}
+            </div>
 
-            <div className="relative">
-              <Input
-                label="Password"
+            <div className="relative space-y-1.5">
+              <label htmlFor="password" className="block text-sm font-medium text-text-secondary">Password</label>
+              <input
+                id="password"
                 type={showPassword ? 'text' : 'password'}
                 placeholder="Create a password"
-                error={errors.password?.message}
+                className="input-field"
                 {...register('password')}
               />
+              {errors.password && <p className="text-sm text-red-400">{errors.password.message}</p>}
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
@@ -101,14 +111,16 @@ export default function Signup() {
               </button>
             </div>
 
-            <div className="relative">
-              <Input
-                label="Confirm Password"
+            <div className="relative space-y-1.5">
+              <label htmlFor="confirmPassword" className="block text-sm font-medium text-text-secondary">Confirm Password</label>
+              <input
+                id="confirmPassword"
                 type={showConfirmPassword ? 'text' : 'password'}
                 placeholder="Confirm your password"
-                error={errors.confirmPassword?.message}
+                className="input-field"
                 {...register('confirmPassword')}
               />
+              {errors.confirmPassword && <p className="text-sm text-red-400">{errors.confirmPassword.message}</p>}
               <button
                 type="button"
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}

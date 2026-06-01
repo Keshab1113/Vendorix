@@ -129,16 +129,19 @@ export function Input({
   label,
   error,
   className,
+  name,
   ...props
 }) {
   return (
     <div className="space-y-1.5">
       {label && (
-        <label className="block text-sm font-medium text-text-secondary">
+        <label htmlFor={name} className="block text-sm font-medium text-text-secondary">
           {label}
         </label>
       )}
       <input
+        id={name}
+        name={name}
         className={cn(
           'input-field',
           error && 'border-red-500 focus:border-red-500 ring-red-500/20',

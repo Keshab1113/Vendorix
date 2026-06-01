@@ -2,11 +2,11 @@
   "name": "vendorix-backend",
   "version": "1.0.0",
   "description": "Vendorix - Vendor Booking Dashboard Backend API",
-  "main": "src/index.js",
+  "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "nodemon src/index.js",
-    "start": "node src/index.js",
+    "dev": "nodemon index.js",
+    "start": "node index.js",
     "setup": "node database/setup.js",
     "seed": "node models/seed.js",
     "db:setup": "node database/setup.js && npm run seed"

@@ -94,8 +94,49 @@ export default function Analytics() {
     : [];
 
   const handleExport = () => {
-    // Placeholder for export functionality
-    alert('Export functionality - coming soon');
+    // Prepare data for CSV export
+    const exportData = {
+      'Total Revenue': stats.total_revenue || 0,
+      'Total Bookings': stats.total_bookings || 0,
+      'Conversion Rate': stats.total_inquiries > 0
+        ? ((stats.total_bookings / stats.total_inquiries) * 100).toFixed(1) + '%'
+        : '0%',
+      'Average Booking Value': stats.average_booking_value || 0,
+      'Period': dateRange === '7d' ? 'Last 7 days' :
+               dateRange === '30d' ? 'Last 30 days' :
+               dateRange === '90d' ? 'Last 90 days' : 'Last 12 months',
+      'Export Date': new Date().toISOString().split('T')[0]
+    };
+
+    // Convert to CSV format
+    const csvRows = [];
+    csvRows.push('Metric,Value');
+    for (const [key, value] of Object.entries(exportData)) {
+      csvRows.push(`"${key}","${value}"`);
+    }
+    csvRows.push('');
+    csvRows.push('Inquiry Status Breakdown');
+    csvRows.push('Status,Count');
+    for (const [status, count] of Object.entries(analytics.inquiry_by_status || {})) {
+      csvRows.push(`"${status}","${count}"`);
+    }
+    csvRows.push('');
+    csvRows.push('Monthly Revenue');
+    csvRows.push('Month,Revenue');
+    for (const item of monthlyRevenue) {
+      csvRows.push(`"${item.month}","${item.revenue}"`);
+    }
+
+    const csvContent = csvRows.join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `analytics-export-${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   const chartColors = {
@@ -129,15 +170,15 @@ export default function Analytics() {
             Track your business performance and insights
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 w-full overflow-x-auto pb-2 sm:pb-0">
           {/* Date Range Selector */}
-          <div className="flex items-center gap-2 p-1 bg-background-secondary rounded-xl">
+          <div className="flex items-center gap-2 p-1 bg-background-secondary rounded-xl flex-shrink-0">
             {dateRanges.map((range) => (
               <button
                 key={range.value}
                 onClick={() => setDateRange(range.value)}
                 className={cn(
-                  'px-4 py-2 rounded-lg text-sm font-medium transition-all',
+                  'px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all flex-shrink-0',
                   dateRange === range.value
                     ? 'bg-accent-primary text-white'
                     : 'text-text-secondary hover:bg-background-tertiary'
@@ -147,7 +188,7 @@ export default function Analytics() {
               </button>
             ))}
           </div>
-          <Button variant="secondary" onClick={handleExport}>
+          <Button variant="secondary" onClick={handleExport} className="flex-shrink-0">
             <Download className="w-4 h-4 mr-2" />
             Export
           </Button>

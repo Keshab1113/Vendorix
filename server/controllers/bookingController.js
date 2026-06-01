@@ -88,7 +88,12 @@ export const createBooking = async (req, res) => {
       total_amount,
       deposit_paid,
       status,
-      payment_status
+      payment_status,
+      customer_name,
+      customer_email,
+      customer_phone,
+      event_type,
+      notes
     } = req.body;
 
     const bookingRef = generateBookingRef();
@@ -97,12 +102,18 @@ export const createBooking = async (req, res) => {
       inquiry_id: inquiry_id || null,
       vendor_id: vendor._id,
       booking_ref: bookingRef,
-      start_date,
-      end_date,
-      total_amount,
+      start_date: start_date || new Date(),
+      end_date: end_date || start_date,
+      total_amount: total_amount || 0,
       deposit_paid: deposit_paid || 0,
       status: status || 'confirmed',
-      payment_status: payment_status || 'pending'
+      payment_status: payment_status || 'pending',
+      // Direct customer fields
+      customer_name,
+      customer_email,
+      customer_phone,
+      event_type,
+      notes
     });
 
     // If booking from inquiry, update inquiry status

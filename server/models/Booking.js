@@ -17,7 +17,13 @@ const bookingSchema = new mongoose.Schema({
     type: String,
     enum: ['pending', 'partial', 'paid', 'refunded'],
     default: 'pending'
-  }
+  },
+  // Direct customer fields when creating booking without inquiry
+  customer_name: { type: String },
+  customer_email: { type: String },
+  customer_phone: { type: String },
+  event_type: { type: String },
+  notes: { type: String }
 }, {
   timestamps: true
 });

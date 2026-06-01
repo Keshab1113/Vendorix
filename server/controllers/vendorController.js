@@ -314,8 +314,9 @@ export const uploadGalleryImage = async (req, res) => {
   try {
     const userId = req.user.id;
 
-    if (!req.file) {
-      return apiError(res, 400, 'No image file provided');
+    const files = req.files;
+    if (!files || files.length === 0) {
+      return apiError(res, 400, 'No image files provided');
     }
 
     const vendor = await Vendor.findOne({ user_id: userId });
@@ -324,19 +325,21 @@ export const uploadGalleryImage = async (req, res) => {
     }
 
     const { caption, category } = req.body;
-    const imageUrl = `/uploads/${req.file.filename}`;
 
-    const image = await GalleryImage.create({
+    // Create multiple gallery images
+    const images = files.map(file => ({
       vendor_id: vendor._id,
-      image_url: imageUrl,
+      image_url: `/uploads/${file.filename}`,
       caption,
       category
-    });
+    }));
 
-    return apiResponse(res, 201, 'Image uploaded', image);
+    const createdImages = await GalleryImage.insertMany(images);
+
+    return apiResponse(res, 201, `${createdImages.length} image(s) uploaded`, createdImages);
   } catch (error) {
     console.error('Upload gallery error:', error);
-    apiError(res, 500, 'Failed to upload image');
+    apiError(res, 500, 'Failed to upload images');
   }
 };
 

@@ -12,11 +12,12 @@ import {
   CheckCircle,
   XCircle,
   Eye,
-  Filter
+  Filter,
+  Plus
 } from 'lucide-react';
 import { bookingApi, dashboardApi } from '@/api/client';
 import { formatCurrency, formatDate, formatDateTime, cn } from '@/lib/utils';
-import { Card, Badge, Button, Skeleton, EmptyState } from '@/components/ui';
+import { Card, Badge, Button, Skeleton, EmptyState, Dialog } from '@/components/ui';
 
 const statusFilters = [
   { value: 'all', label: 'All Status' },
@@ -45,6 +46,16 @@ export default function Bookings() {
   const [statusFilter, setStatusFilter] = useState('all');
   const [paymentFilter, setPaymentFilter] = useState('all');
   const [selectedBooking, setSelectedBooking] = useState(null);
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [newBooking, setNewBooking] = useState({
+    customer_name: '',
+    customer_email: '',
+    customer_phone: '',
+    event_type: '',
+    event_date: '',
+    total_amount: '',
+    notes: ''
+  });
 
   const queryClient = useQueryClient();
 
@@ -76,6 +87,33 @@ export default function Bookings() {
     }
   });
 
+  const createBookingMutation = useMutation({
+    mutationFn: (data) => bookingApi.create(data),
+    onSuccess: () => {
+      queryClient.invalidateQueries(['bookings']);
+      setShowCreateDialog(false);
+      setNewBooking({
+        customer_name: '',
+        customer_email: '',
+        customer_phone: '',
+        event_type: '',
+        event_date: '',
+        total_amount: '',
+        notes: ''
+      });
+    }
+  });
+
+  const handleCreateBooking = () => {
+    const data = {
+      ...newBooking,
+      start_date: newBooking.event_date,
+      end_date: newBooking.event_date,
+      total_amount: parseFloat(newBooking.total_amount) || 0
+    };
+    createBookingMutation.mutate(data);
+  };
+
   const getBookingsData = () => {
     if (!data) return [];
     if (Array.isArray(data)) return data;
@@ -87,7 +125,7 @@ export default function Bookings() {
   const bookings = getBookingsData().map(b => ({
     ...b,
     id: b._id,
-    customer_name: b.inquiry_id?.customer_name || 'N/A',
+    customer_name: b.inquiry_id?.customer_name || b.customer_name || 'N/A',
     date: b.inquiry_id?.event_date || b.start_date,
     service_name: b.inquiry_id?.event_type || 'Service'
   }));
@@ -127,6 +165,10 @@ export default function Bookings() {
             Manage and track all your bookings
           </p>
         </div>
+        <Button onClick={() => setShowCreateDialog(true)}>
+          <Plus className="w-4 h-4 mr-2" />
+          Add Booking
+        </Button>
       </motion.div>
 
       {/* Filters */}
@@ -135,15 +177,15 @@ export default function Bookings() {
         animate={{ opacity: 1, y: 0 }}
         className="flex flex-col sm:flex-row gap-4"
       >
-        <div className="flex items-center gap-2">
-          <Filter className="w-4 h-4 text-text-muted" />
+        <div className="flex items-center gap-2 overflow-x-auto pb-2 sm:pb-0">
+          <Filter className="w-4 h-4 text-text-muted flex-shrink-0" />
           <div className="flex flex-wrap gap-2">
             {statusFilters.map((filter) => (
               <button
                 key={filter.value}
                 onClick={() => setStatusFilter(filter.value)}
                 className={cn(
-                  'px-4 py-2 rounded-lg text-sm font-medium transition-all',
+                  'px-3 py-1.5 sm:px-4 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all flex-shrink-0',
                   statusFilter === filter.value
                     ? 'bg-accent-primary text-white'
                     : 'bg-background-secondary text-text-secondary hover:bg-background-tertiary'
@@ -153,22 +195,6 @@ export default function Bookings() {
               </button>
             ))}
           </div>
-        </div>
-        <div className="flex items-center gap-2">
-          {paymentFilters.map((filter) => (
-            <button
-              key={filter.value}
-              onClick={() => setPaymentFilter(filter.value)}
-              className={cn(
-                'px-4 py-2 rounded-lg text-sm font-medium transition-all',
-                paymentFilter === filter.value
-                  ? 'bg-accent-secondary text-white'
-                  : 'bg-background-secondary text-text-secondary hover:bg-background-tertiary'
-              )}
-            >
-              {filter.label}
-            </button>
-          ))}
         </div>
       </motion.div>
 
@@ -203,104 +229,188 @@ export default function Bookings() {
               }
             />
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="border-b border-border">
-                    <th className="text-left p-4 text-sm font-semibold text-text-secondary">Booking</th>
-                    <th className="text-left p-4 text-sm font-semibold text-text-secondary">Customer</th>
-                    <th className="text-left p-4 text-sm font-semibold text-text-secondary">Date & Time</th>
-                    <th className="text-left p-4 text-sm font-semibold text-text-secondary">Amount</th>
-                    <th className="text-left p-4 text-sm font-semibold text-text-secondary">Status</th>
-                    <th className="text-left p-4 text-sm font-semibold text-text-secondary">Payment</th>
-                    <th className="text-right p-4 text-sm font-semibold text-text-secondary">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {bookings.map((booking, index) => (
-                    <motion.tr
-                      key={booking.id}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: index * 0.05 }}
-                      className="border-b border-border/50 hover:bg-background-tertiary/30 transition-colors"
-                    >
-                      <td className="p-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-accent-primary/10 text-accent-primary flex items-center justify-center">
-                            <Calendar className="w-5 h-5" />
-                          </div>
-                          <div>
-                            <p className="font-medium text-text-primary">{booking.booking_ref || `#BK${booking.id}`}</p>
-                            <p className="text-sm text-text-muted">{booking.service_name || 'Service'}</p>
-                          </div>
+            <>
+              {/* Mobile Card Layout */}
+              <div className="md:hidden space-y-3 p-4">
+                {bookings.map((booking, index) => (
+                  <motion.div
+                    key={booking.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    className="bg-background-tertiary/30 rounded-xl p-4 border border-border/50"
+                  >
+                    <div className="flex items-start justify-between mb-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-xl bg-accent-primary/10 text-accent-primary flex items-center justify-center">
+                          <Calendar className="w-5 h-5" />
                         </div>
-                      </td>
-                      <td className="p-4">
-                        <div className="flex items-center gap-2">
-                          <User className="w-4 h-4 text-text-muted" />
-                          <span className="text-text-primary">{booking.customer_name}</span>
+                        <div>
+                          <p className="font-medium text-text-primary text-sm">{booking.booking_ref || `#BK${booking.id}`}</p>
+                          <p className="text-xs text-text-muted">{booking.service_name || 'Service'}</p>
                         </div>
-                      </td>
-                      <td className="p-4">
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2">
-                            <Clock className="w-4 h-4 text-text-muted" />
-                            <span className="text-text-primary">{formatDateTime(booking.date)}</span>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="p-4">
-                        <span className="font-semibold text-text-primary">
+                      </div>
+                      <Badge variant={statusBadgeColors[booking.status] || 'default'} className="text-xs">
+                        {booking.status?.replace('_', ' ')}
+                      </Badge>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3 text-sm">
+                      <div>
+                        <p className="text-text-muted text-xs">Customer</p>
+                        <p className="text-text-primary font-medium truncate">{booking.customer_name}</p>
+                      </div>
+                      <div>
+                        <p className="text-text-muted text-xs">Amount</p>
+                        <p className="text-text-primary font-semibold">
                           {formatCurrency(booking.total_amount || booking.price || 0)}
-                        </span>
-                      </td>
-                      <td className="p-4">
-                        <Badge variant={statusBadgeColors[booking.status] || 'default'}>
-                          {booking.status?.replace('_', ' ')}
-                        </Badge>
-                      </td>
-                      <td className="p-4">
-                        <Badge variant={booking.payment_status === 'paid' ? 'success' : 'warning'}>
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-text-muted text-xs">Date</p>
+                        <p className="text-text-primary text-xs">{formatDateTime(booking.date)}</p>
+                      </div>
+                      <div>
+                        <p className="text-text-muted text-xs">Payment</p>
+                        <Badge variant={booking.payment_status === 'paid' ? 'success' : 'warning'} className="text-xs">
                           {booking.payment_status || 'unpaid'}
                         </Badge>
-                      </td>
-                      <td className="p-4">
-                        <div className="flex items-center justify-end gap-2">
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-end gap-2 mt-3 pt-3 border-t border-border/50">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setSelectedBooking(booking)}
+                      >
+                        <Eye className="w-4 h-4" />
+                      </Button>
+                      {booking.status === 'pending' && (
+                        <>
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => setSelectedBooking(booking)}
+                            onClick={() => handleAcceptBooking(booking.id)}
+                            className="text-green-400 hover:text-green-300"
                           >
-                            <Eye className="w-4 h-4" />
+                            <CheckCircle className="w-4 h-4" />
                           </Button>
-                          {booking.status === 'pending' && (
-                            <>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleAcceptBooking(booking.id)}
-                                className="text-green-400 hover:text-green-300"
-                              >
-                                <CheckCircle className="w-4 h-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleCancelBooking(booking.id)}
-                                className="text-red-400 hover:text-red-300"
-                              >
-                                <XCircle className="w-4 h-4" />
-                              </Button>
-                            </>
-                          )}
-                        </div>
-                      </td>
-                    </motion.tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleCancelBooking(booking.id)}
+                            className="text-red-400 hover:text-red-300"
+                          >
+                            <XCircle className="w-4 h-4" />
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* Desktop Table Layout */}
+              <div className="hidden md:block overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-border">
+                      <th className="text-left p-4 text-sm font-semibold text-text-secondary">Booking</th>
+                      <th className="text-left p-4 text-sm font-semibold text-text-secondary">Customer</th>
+                      <th className="text-left p-4 text-sm font-semibold text-text-secondary">Date & Time</th>
+                      <th className="text-left p-4 text-sm font-semibold text-text-secondary">Amount</th>
+                      <th className="text-left p-4 text-sm font-semibold text-text-secondary">Status</th>
+                      <th className="text-left p-4 text-sm font-semibold text-text-secondary">Payment</th>
+                      <th className="text-right p-4 text-sm font-semibold text-text-secondary">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {bookings.map((booking, index) => (
+                      <motion.tr
+                        key={booking.id}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: index * 0.05 }}
+                        className="border-b border-border/50 hover:bg-background-tertiary/30 transition-colors"
+                      >
+                        <td className="p-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-xl bg-accent-primary/10 text-accent-primary flex items-center justify-center">
+                              <Calendar className="w-5 h-5" />
+                            </div>
+                            <div>
+                              <p className="font-medium text-text-primary">{booking.booking_ref || `#BK${booking.id}`}</p>
+                              <p className="text-sm text-text-muted">{booking.service_name || 'Service'}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="p-4">
+                          <div className="flex items-center gap-2">
+                            <User className="w-4 h-4 text-text-muted" />
+                            <span className="text-text-primary">{booking.customer_name}</span>
+                          </div>
+                        </td>
+                        <td className="p-4">
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                              <Clock className="w-4 h-4 text-text-muted" />
+                              <span className="text-text-primary">{formatDateTime(booking.date)}</span>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="p-4">
+                          <span className="font-semibold text-text-primary">
+                            {formatCurrency(booking.total_amount || booking.price || 0)}
+                          </span>
+                        </td>
+                        <td className="p-4">
+                          <Badge variant={statusBadgeColors[booking.status] || 'default'}>
+                            {booking.status?.replace('_', ' ')}
+                          </Badge>
+                        </td>
+                        <td className="p-4">
+                          <Badge variant={booking.payment_status === 'paid' ? 'success' : 'warning'}>
+                            {booking.payment_status || 'unpaid'}
+                          </Badge>
+                        </td>
+                        <td className="p-4">
+                          <div className="flex items-center justify-end gap-2">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setSelectedBooking(booking)}
+                            >
+                              <Eye className="w-4 h-4" />
+                            </Button>
+                            {booking.status === 'pending' && (
+                              <>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleAcceptBooking(booking.id)}
+                                  className="text-green-400 hover:text-green-300"
+                                >
+                                  <CheckCircle className="w-4 h-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleCancelBooking(booking.id)}
+                                  className="text-red-400 hover:text-red-300"
+                                >
+                                  <XCircle className="w-4 h-4" />
+                                </Button>
+                              </>
+                            )}
+                          </div>
+                        </td>
+                      </motion.tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </>
           )}
         </Card>
       </motion.div>
@@ -308,7 +418,7 @@ export default function Bookings() {
       {/* Booking Details Modal */}
       {selectedBooking && (
         <Dialog open={!!selectedBooking} onOpenChange={() => setSelectedBooking(null)}>
-          <div className="bg-background-secondary border border-border rounded-2xl w-full max-w-lg p-6">
+          <div className="bg-background-secondary border border-border rounded-2xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-semibold text-text-primary">Booking Details</h2>
               <button
@@ -418,7 +528,7 @@ export default function Bookings() {
                       isLoading={updateStatusMutation.isPending}
                     >
                       <CheckCircle className="w-4 h-4 mr-2" />
-                      Accept Booking
+                      Accept
                     </Button>
                     <Button
                       variant="danger"
@@ -448,36 +558,122 @@ export default function Bookings() {
           </div>
         </Dialog>
       )}
-    </div>
-  );
-}
 
-// Dialog import helper
-function Dialog({ open, onOpenChange, children }) {
-  const { AnimatePresence, motion } = require('framer-motion');
-  if (!open) return null;
-  return (
-    <AnimatePresence>
-      <div className="fixed inset-0 z-50">
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm"
-          onClick={() => onOpenChange(false)}
-        />
-        <div className="fixed inset-0 flex items-center justify-center p-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            {children}
-          </motion.div>
+      {/* Create Booking Dialog */}
+      <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+        <div className="bg-background-secondary border border-border rounded-2xl w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto">
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-xl font-semibold text-text-primary">Create New Booking</h2>
+            <button
+              onClick={() => setShowCreateDialog(false)}
+              className="p-2 rounded-lg hover:bg-background-tertiary transition-colors"
+            >
+              <X className="w-5 h-5 text-text-muted" />
+            </button>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-text-secondary mb-1.5">Customer Name *</label>
+              <input
+                type="text"
+                value={newBooking.customer_name}
+                onChange={(e) => setNewBooking({ ...newBooking, customer_name: e.target.value })}
+                className="input-field w-full"
+                placeholder="Enter customer name"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-text-secondary mb-1.5">Email</label>
+                <input
+                  type="email"
+                  value={newBooking.customer_email}
+                  onChange={(e) => setNewBooking({ ...newBooking, customer_email: e.target.value })}
+                  className="input-field w-full"
+                  placeholder="customer@email.com"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-text-secondary mb-1.5">Phone</label>
+                <input
+                  type="tel"
+                  value={newBooking.customer_phone}
+                  onChange={(e) => setNewBooking({ ...newBooking, customer_phone: e.target.value })}
+                  className="input-field w-full"
+                  placeholder="(555) 123-4567"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-text-secondary mb-1.5">Event Type</label>
+              <input
+                type="text"
+                value={newBooking.event_type}
+                onChange={(e) => setNewBooking({ ...newBooking, event_type: e.target.value })}
+                className="input-field w-full"
+                placeholder="Wedding, Party, Corporate Event, etc."
+              />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-text-secondary mb-1.5">Event Date *</label>
+                <input
+                  type="date"
+                  value={newBooking.event_date}
+                  onChange={(e) => setNewBooking({ ...newBooking, event_date: e.target.value })}
+                  className="input-field w-full"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-text-secondary mb-1.5">Total Amount ($)</label>
+                <input
+                  type="number"
+                  value={newBooking.total_amount}
+                  onChange={(e) => setNewBooking({ ...newBooking, total_amount: e.target.value })}
+                  className="input-field w-full"
+                  placeholder="0"
+                  min="0"
+                  step="0.01"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-text-secondary mb-1.5">Notes</label>
+              <textarea
+                value={newBooking.notes}
+                onChange={(e) => setNewBooking({ ...newBooking, notes: e.target.value })}
+                className="input-field w-full resize-none"
+                rows={3}
+                placeholder="Additional notes or requirements..."
+              />
+            </div>
+          </div>
+
+          <div className="flex gap-3 pt-6">
+            <Button
+              variant="ghost"
+              className="flex-1"
+              onClick={() => setShowCreateDialog(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="primary"
+              className="flex-1"
+              onClick={handleCreateBooking}
+              disabled={!newBooking.customer_name || !newBooking.event_date}
+              isLoading={createBookingMutation.isPending}
+            >
+              Create Booking
+            </Button>
+          </div>
         </div>
-      </div>
-    </AnimatePresence>
+      </Dialog>
+    </div>
   );
 }

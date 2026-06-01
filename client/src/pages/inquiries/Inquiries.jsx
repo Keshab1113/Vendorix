@@ -98,7 +98,7 @@ export default function Inquiries() {
     updateStatusMutation.mutate({ id, status: newStatus });
   };
 
-  const inquiries = data?.inquiries || [];
+  const inquiries = (data?.inquiries || []).map(n => ({ ...n, id: n._id }));
   const pagination = data?.pagination || { page: 1, pages: 1, total: 0 };
 
   const getPriorityClass = (priority) => {
@@ -238,7 +238,93 @@ export default function Inquiries() {
           />
         ) : (
           <>
-            <div className="overflow-x-auto">
+            {/* Mobile Card Layout */}
+            <div className="md:hidden space-y-3 p-4">
+              {inquiries.map((inquiry, index) => (
+                <motion.div
+                  key={inquiry.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                  className="bg-background-tertiary/30 rounded-xl p-4 border border-border/50"
+                >
+                  <div className="flex items-start justify-between mb-3">
+                    <div>
+                      <p className="font-medium text-text-primary text-sm">{inquiry.customer_name}</p>
+                      <p className="text-xs text-text-muted">{inquiry.customer_email}</p>
+                    </div>
+                    <div className="flex flex-col items-end gap-1">
+                      <Badge className={getStatusClass(inquiry.status)}>
+                        {inquiry.status}
+                      </Badge>
+                      <span className={cn('badge text-xs', getPriorityClass(inquiry.priority))}>
+                        {inquiry.priority}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 text-sm">
+                    <div>
+                      <p className="text-text-muted text-xs">Event</p>
+                      <p className="text-text-primary">{inquiry.event_type}</p>
+                    </div>
+                    <div>
+                      <p className="text-text-muted text-xs">Guests</p>
+                      <p className="text-text-primary">{inquiry.guest_count}</p>
+                    </div>
+                    <div>
+                      <p className="text-text-muted text-xs">Date</p>
+                      <p className="text-text-primary text-xs">{formatDate(inquiry.event_date)}</p>
+                    </div>
+                    <div>
+                      <p className="text-text-muted text-xs">Budget</p>
+                      <p className="text-text-primary font-semibold">{formatCurrency(inquiry.budget || 0)}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-end gap-2 mt-3 pt-3 border-t border-border/50">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setSelectedInquiry(inquiry)}
+                    >
+                      <Eye className="w-4 h-4" />
+                    </Button>
+                    {inquiry.status === 'pending' && (
+                      <>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleStatusUpdate(inquiry.id, 'contacted')}
+                          className="text-blue-400 hover:text-blue-300"
+                        >
+                          <Mail className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleStatusUpdate(inquiry.id, 'confirmed')}
+                          className="text-green-400 hover:text-green-300"
+                        >
+                          <CheckCircle className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleStatusUpdate(inquiry.id, 'rejected')}
+                          className="text-red-400 hover:text-red-300"
+                        >
+                          <XCircle className="w-4 h-4" />
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Desktop Table Layout */}
+            <div className="hidden md:block overflow-x-auto">
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-border">
@@ -338,7 +424,7 @@ export default function Inquiries() {
 
             {/* Pagination */}
             {pagination.pages > 1 && (
-              <div className="flex items-center justify-between p-4 border-t border-border">
+              <div className="hidden md:flex items-center justify-between p-4 border-t border-border">
                 <p className="text-sm text-text-secondary">
                   Showing {(page - 1) * 10 + 1} to {Math.min(page * 10, pagination.total)} of {pagination.total} results
                 </p>

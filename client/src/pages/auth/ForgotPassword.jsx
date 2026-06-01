@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import { Mail, ArrowRight, Loader2, CheckCircle } from 'lucide-react';
 import { authApi } from '@/api/client';
 import { useToastStore } from '@/store';
-import { Button, Input } from '@/components/ui';
+import { Button } from '@/components/ui';
 import { forgotPasswordSchema } from '@/lib/validations';
 
 export default function ForgotPassword() {
@@ -104,13 +104,17 @@ export default function ForgotPassword() {
 
           {/* Form */}
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-            <Input
-              label="Email"
-              type="email"
-              placeholder="you@example.com"
-              error={errors.email?.message}
-              {...register('email')}
-            />
+            <div className="space-y-1.5">
+              <label htmlFor="email" className="block text-sm font-medium text-text-secondary">Email</label>
+              <input
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                className="input-field"
+                {...register('email')}
+              />
+              {errors.email && <p className="text-sm text-red-400">{errors.email.message}</p>}
+            </div>
 
             <Button
               type="submit"
