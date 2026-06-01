@@ -127,34 +127,34 @@ cd vendorix
 
 ---
 
-# 📦 Frontend Setup
+## Frontend
 
 ```bash
-cd client
 npm install
-npm run dev
+npm run dev      # Development
+npm run build    # Production build
 ```
 
-Frontend runs on:
-
-```bash
-http://localhost:5173
-```
-
----
-
-# 🖥️ Backend Setup
+## Backend
 
 ```bash
 cd server
 npm install
-npm run dev
+npm run dev      # Development
+npm start        # Production
 ```
 
-Backend runs on:
+## Database Setup
 
+1. Create MySQL database:
 ```bash
-http://localhost:5000
+mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS vendorix;"
+```
+
+2. Initialize tables and seed data:
+```bash
+cd server
+npm run seed
 ```
 
 ---
