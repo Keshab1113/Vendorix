@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { vendorApi } from '@/api/client';
 import { cn } from '@/lib/utils';
-import { Card, Badge, Button, Skeleton, EmptyState, Dialog } from '@/components/ui';
+import { Card, Badge, Button, Skeleton, EmptyState, Dialog, ConfirmDialog } from '@/components/ui';
 import { useToast } from '@/components/ui';
 
 const categories = [
@@ -26,6 +26,7 @@ export default function Gallery() {
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [selectedImage, setSelectedImage] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
   const fileInputRef = useRef(null);
   const queryClient = useQueryClient();
   const { showToast } = useToast();
@@ -98,8 +99,15 @@ export default function Gallery() {
   };
 
   const handleDelete = (id) => {
-    if (window.confirm('Are you sure you want to delete this image?')) {
-      deleteMutation.mutate(id);
+    if (id && id !== 'undefined') {
+      setDeleteConfirm(id);
+    }
+  };
+
+  const confirmDelete = () => {
+    if (deleteConfirm && deleteConfirm !== 'undefined') {
+      deleteMutation.mutate(deleteConfirm);
+      setDeleteConfirm(null);
     }
   };
 
@@ -298,6 +306,20 @@ export default function Gallery() {
           </div>
         </Dialog>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        open={!!deleteConfirm}
+        onOpenChange={(confirm) => {
+          if (confirm) confirmDelete();
+          else setDeleteConfirm(null);
+        }}
+        title="Delete Image"
+        message="Are you sure you want to delete this image? This action cannot be undone."
+        confirmText="Delete"
+        variant="danger"
+        isLoading={deleteMutation.isPending}
+      />
     </div>
   );
 }

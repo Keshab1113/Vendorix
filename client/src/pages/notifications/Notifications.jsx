@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { notificationApi } from '@/api/client';
 import { formatRelativeTime, cn } from '@/lib/utils';
-import { Card, Badge, Button, Skeleton, EmptyState } from '@/components/ui';
+import { Card, Badge, Button, Skeleton, EmptyState, ConfirmDialog } from '@/components/ui';
 import { useToast } from '@/components/ui';
 
 const notificationIcons = {
@@ -32,6 +32,7 @@ const notificationColors = {
 
 export default function Notifications() {
   const [filter, setFilter] = useState('all');
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
   const queryClient = useQueryClient();
   const { showToast } = useToast();
 
@@ -101,8 +102,15 @@ export default function Notifications() {
   };
 
   const handleDelete = (id) => {
-    if (window.confirm('Are you sure you want to delete this notification?')) {
-      deleteMutation.mutate(id);
+    if (id && id !== 'undefined') {
+      setDeleteConfirm(id);
+    }
+  };
+
+  const confirmDelete = () => {
+    if (deleteConfirm && deleteConfirm !== 'undefined') {
+      deleteMutation.mutate(deleteConfirm);
+      setDeleteConfirm(null);
     }
   };
 
@@ -290,6 +298,20 @@ export default function Notifications() {
           })}
         </motion.div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        open={!!deleteConfirm}
+        onOpenChange={(confirm) => {
+          if (confirm) confirmDelete();
+          else setDeleteConfirm(null);
+        }}
+        title="Delete Notification"
+        message="Are you sure you want to delete this notification? This action cannot be undone."
+        confirmText="Delete"
+        variant="danger"
+        isLoading={deleteMutation.isPending}
+      />
     </div>
   );
 }

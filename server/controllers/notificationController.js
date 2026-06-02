@@ -67,6 +67,11 @@ export const deleteNotification = async (req, res) => {
     const { id } = req.params;
     const userId = req.user.id;
 
+    // Validate id format before querying
+    if (!id || id === 'undefined' || id === 'null' || !id.match(/^[0-9a-fA-F]{24}$/)) {
+      return apiError(res, 400, 'Invalid notification ID');
+    }
+
     const notification = await Notification.findOne({ _id: id, user_id: userId });
 
     if (!notification) {

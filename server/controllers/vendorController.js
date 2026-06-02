@@ -179,6 +179,11 @@ export const deleteService = async (req, res) => {
   try {
     const { id } = req.params;
 
+    // Validate id format before querying
+    if (!id || id === 'undefined' || id === 'null' || !id.match(/^[0-9a-fA-F]{24}$/)) {
+      return apiError(res, 400, 'Invalid service ID');
+    }
+
     const service = await Service.findById(id);
     if (!service) {
       return apiError(res, 404, 'Service not found');
@@ -275,6 +280,11 @@ export const deletePackage = async (req, res) => {
   try {
     const { id } = req.params;
 
+    // Validate id format before querying
+    if (!id || id === 'undefined' || id === 'null' || !id.match(/^[0-9a-fA-F]{24}$/)) {
+      return apiError(res, 400, 'Invalid package ID');
+    }
+
     const pkg = await Package.findById(id);
     if (!pkg) {
       return apiError(res, 404, 'Package not found');
@@ -346,6 +356,11 @@ export const uploadGalleryImage = async (req, res) => {
 export const deleteGalleryImage = async (req, res) => {
   try {
     const { id } = req.params;
+
+    // Validate id format before querying
+    if (!id || id === 'undefined' || id === 'null' || !id.match(/^[0-9a-fA-F]{24}$/)) {
+      return apiError(res, 400, 'Invalid image ID');
+    }
 
     const image = await GalleryImage.findById(id);
     if (!image) {

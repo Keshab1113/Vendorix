@@ -130,17 +130,19 @@ export function Input({
   error,
   className,
   name,
+  id,
   ...props
 }) {
+  const inputId = id || name;
   return (
     <div className="space-y-1.5">
       {label && (
-        <label htmlFor={name} className="block text-sm font-medium text-text-secondary">
+        <label htmlFor={inputId} className="block text-sm font-medium text-text-secondary">
           {label}
         </label>
       )}
       <input
-        id={name}
+        id={inputId}
         name={name}
         className={cn(
           'input-field',
@@ -369,3 +371,6 @@ export {
   DropdownMenuSeparator,
   DropdownMenuLabel
 } from './dropdown';
+
+// Confirm Dialog export
+export { ConfirmDialog } from './ConfirmDialog';

@@ -28,10 +28,10 @@ export const resetPasswordSchema = z.object({
 });
 
 export const profileSchema = z.object({
-  business_name: z.string().min(2, 'Business name must be at least 2 characters'),
-  category: z.string().min(1, 'Category is required'),
-  email: z.string().email('Invalid email address'),
-  phone: z.string().min(10, 'Valid phone number required'),
+  business_name: z.string().optional(),
+  category: z.string().optional(),
+  email: z.union([z.string().email('Invalid email address'), z.literal('')]).optional(),
+  phone: z.string().optional(),
   address: z.string().optional(),
   city: z.string().optional(),
   state: z.string().optional(),
@@ -72,10 +72,10 @@ export const serviceSchema = z.object({
 });
 
 export const packageSchema = z.object({
-  name: z.string().min(2, 'Package name is required'),
+  name: z.string().min(1, 'Package name is required').trim(),
   description: z.string().optional(),
-  price: z.coerce.number().positive('Price is required'),
-  features: z.array(z.string()).optional(),
+  price: z.coerce.number({ invalid_type_error: 'Price is required' }).min(0, 'Price must be 0 or greater'),
+  features: z.union([z.string(), z.array(z.string())]).optional(),
   is_featured: z.boolean().optional()
 });
 

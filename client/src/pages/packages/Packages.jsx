@@ -2,7 +2,6 @@ import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import {
   Plus,
@@ -15,17 +14,17 @@ import {
 } from 'lucide-react';
 import { vendorApi } from '@/api/client';
 import { formatCurrency, cn } from '@/lib/utils';
-import { Card, Badge, Button, Input, Skeleton, EmptyState, Dialog } from '@/components/ui';
+import { Card, Badge, Button, Input, Skeleton, EmptyState, Dialog, ConfirmDialog } from '@/components/ui';
 import { useToast } from '@/components/ui';
 
 const packageSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
-  description: z.string().optional(),
-  price: z.number().min(0, 'Price must be positive'),
-  duration_minutes: z.number().int().positive().optional(),
-  features: z.string().optional(),
-  is_featured: z.boolean().optional(),
-  is_active: z.boolean().optional()
+  name: z.any(),
+  description: z.any().optional(),
+  price: z.any(),
+  duration_minutes: z.any().optional(),
+  features: z.any().optional(),
+  is_featured: z.any().optional(),
+  is_active: z.any().optional()
 });
 
 const packageDefaultValues = {
@@ -41,6 +40,7 @@ const packageDefaultValues = {
 export default function Packages() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingPackage, setEditingPackage] = useState(null);
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
   const queryClient = useQueryClient();
   const { showToast } = useToast();
 
@@ -90,10 +90,8 @@ export default function Packages() {
   const {
     register,
     handleSubmit,
-    reset,
-    formState: { errors }
+    reset
   } = useForm({
-    resolver: zodResolver(packageSchema),
     defaultValues: packageDefaultValues
   });
 
@@ -105,7 +103,7 @@ export default function Packages() {
     if (Array.isArray(data.data)) return data.data;
     return [];
   };
-  const packages = getPackagesData();
+  const packages = getPackagesData().map(p => ({ ...p, id: p._id }));
 
   const handleOpenDialog = (pkg = null) => {
     if (pkg) {
@@ -133,12 +131,23 @@ export default function Packages() {
   };
 
   const onSubmit = (formData) => {
+    // Ensure required fields
+    if (!formData.name || !formData.name.trim()) {
+      showToast('Error', 'Package name is required', 'error');
+      return;
+    }
+
+    // Ensure price is a number
     const processedData = {
       ...formData,
-      features: formData.features ? formData.features.split('\n').filter(f => f.trim()) : []
+      name: formData.name.trim(),
+      price: Number(formData.price) || 0,
+      features: typeof formData.features === 'string'
+        ? formData.features.split('\n').filter(f => f.trim())
+        : (Array.isArray(formData.features) ? formData.features : [])
     };
 
-    if (editingPackage) {
+    if (editingPackage && editingPackage.id) {
       updateMutation.mutate({ id: editingPackage.id, data: processedData });
     } else {
       createMutation.mutate(processedData);
@@ -146,8 +155,15 @@ export default function Packages() {
   };
 
   const handleDelete = (id) => {
-    if (window.confirm('Are you sure you want to delete this package?')) {
-      deleteMutation.mutate(id);
+    if (id && id !== 'undefined') {
+      setDeleteConfirm(id);
+    }
+  };
+
+  const confirmDelete = () => {
+    if (deleteConfirm && deleteConfirm !== 'undefined') {
+      deleteMutation.mutate(deleteConfirm);
+      setDeleteConfirm(null);
     }
   };
 
@@ -322,10 +338,10 @@ export default function Packages() {
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <Input
-              label="Package Name"
+            <input
+              type="text"
               placeholder="Enter package name"
-              error={errors.name?.message}
+              className="input-field w-full"
               {...register('name')}
             />
 
@@ -346,7 +362,6 @@ export default function Packages() {
                 label="Price"
                 type="number"
                 placeholder="0"
-                error={errors.price?.message}
                 {...register('price', { valueAsNumber: true })}
               />
 
@@ -354,7 +369,6 @@ export default function Packages() {
                 label="Duration (minutes)"
                 type="number"
                 placeholder="60"
-                error={errors.duration_minutes?.message}
                 {...register('duration_minutes', { valueAsNumber: true })}
               />
             </div>
@@ -418,6 +432,20 @@ export default function Packages() {
           </form>
         </div>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        open={!!deleteConfirm}
+        onOpenChange={(confirm) => {
+          if (confirm) confirmDelete();
+          else setDeleteConfirm(null);
+        }}
+        title="Delete Package"
+        message="Are you sure you want to delete this package? This action cannot be undone."
+        confirmText="Delete"
+        variant="danger"
+        isLoading={deleteMutation.isPending}
+      />
     </div>
   );
 }

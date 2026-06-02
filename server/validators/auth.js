@@ -28,10 +28,10 @@ export const resetPasswordSchema = z.object({
 });
 
 export const vendorProfileSchema = z.object({
-  business_name: z.string().min(2, 'Business name is required'),
-  category: z.string().min(1, 'Category is required'),
-  email: z.string().email('Invalid email address'),
-  phone: z.string().min(10, 'Valid phone number required'),
+  business_name: z.string().optional(),
+  category: z.string().optional(),
+  email: z.string().email('Invalid email address').or(z.literal('')).optional(),
+  phone: z.string().optional(),
   address: z.string().optional(),
   city: z.string().optional(),
   state: z.string().optional(),
@@ -64,18 +64,18 @@ export const bookingSchema = z.object({
 });
 
 export const serviceSchema = z.object({
-  name: z.string().min(2, 'Service name is required'),
+  name: z.string().min(1, 'Service name is required'),
   description: z.string().optional(),
-  duration_minutes: z.number().int().positive().optional(),
-  price: z.number().positive('Price must be positive'),
+  duration_minutes: z.coerce.number().int().positive().optional(),
+  price: z.coerce.number().min(0, 'Price must be 0 or greater'),
   is_active: z.boolean().optional()
 });
 
 export const packageSchema = z.object({
-  name: z.string().min(2, 'Package name is required'),
+  name: z.string().min(1, 'Package name is required'),
   description: z.string().optional(),
-  price: z.number().positive('Price must be positive'),
-  features: z.array(z.string()).optional(),
+  price: z.coerce.number().min(0, 'Price must be 0 or greater'),
+  features: z.union([z.string(), z.array(z.string())]).optional(),
   is_featured: z.boolean().optional()
 });
 

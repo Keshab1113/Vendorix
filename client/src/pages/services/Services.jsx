@@ -15,14 +15,14 @@ import {
 } from 'lucide-react';
 import { vendorApi } from '@/api/client';
 import { formatCurrency, cn } from '@/lib/utils';
-import { Card, Badge, Button, Skeleton, EmptyState, Dialog } from '@/components/ui';
+import { Card, Badge, Button, Skeleton, EmptyState, Dialog, ConfirmDialog } from '@/components/ui';
 import { useToast } from '@/components/ui';
 
 const serviceSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
+  name: z.string().min(1, 'Name is required').trim(),
   description: z.string().optional(),
-  duration_minutes: z.number().int().positive().optional(),
-  price: z.number().min(0, 'Price must be positive'),
+  duration_minutes: z.coerce.number().int().positive().optional(),
+  price: z.coerce.number().min(0, 'Price must be 0 or greater'),
   is_active: z.boolean().optional()
 });
 
@@ -37,6 +37,7 @@ const serviceDefaultValues = {
 export default function Services() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingService, setEditingService] = useState(null);
+  const [deleteConfirm, setDeleteConfirm] = useState(null);
   const queryClient = useQueryClient();
   const { showToast } = useToast();
 
@@ -101,11 +102,11 @@ export default function Services() {
     if (Array.isArray(data.data)) return data.data;
     return [];
   };
-  const services = getServicesData();
+  const services = getServicesData().map(s => ({ ...s, id: s._id }));
 
   const handleOpenDialog = (service = null) => {
     if (service) {
-      setEditingService(service);
+      setEditingService({ ...service, id: service._id || service.id });
       reset({
         name: service.name || '',
         description: service.description || '',
@@ -127,16 +128,29 @@ export default function Services() {
   };
 
   const onSubmit = (formData) => {
-    if (editingService) {
-      updateMutation.mutate({ id: editingService.id, data: formData });
+    // Ensure price is a number
+    const processedData = {
+      ...formData,
+      price: Number(formData.price) || 0,
+      duration_minutes: Number(formData.duration_minutes) || 60
+    };
+    if (editingService && editingService.id) {
+      updateMutation.mutate({ id: editingService.id, data: processedData });
     } else {
-      createMutation.mutate(formData);
+      createMutation.mutate(processedData);
     }
   };
 
   const handleDelete = (id) => {
-    if (window.confirm('Are you sure you want to delete this service?')) {
-      deleteMutation.mutate(id);
+    if (id && id !== 'undefined') {
+      setDeleteConfirm(id);
+    }
+  };
+
+  const confirmDelete = () => {
+    if (deleteConfirm && deleteConfirm !== 'undefined') {
+      deleteMutation.mutate(deleteConfirm);
+      setDeleteConfirm(null);
     }
   };
 
@@ -356,6 +370,20 @@ export default function Services() {
           </form>
         </div>
       </Dialog>
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        open={!!deleteConfirm}
+        onOpenChange={(confirm) => {
+          if (confirm) confirmDelete();
+          else setDeleteConfirm(null);
+        }}
+        title="Delete Service"
+        message="Are you sure you want to delete this service? This action cannot be undone."
+        confirmText="Delete"
+        variant="danger"
+        isLoading={deleteMutation.isPending}
+      />
     </div>
   );
 }
