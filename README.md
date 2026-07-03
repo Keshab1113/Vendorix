@@ -10,6 +10,7 @@
 
 Vendorix helps vendors manage bookings, event inquiries, customer requests, analytics, and business operations through a modern, scalable, and production-ready dashboard experience.
 
+
 ---
 
 ## ✨ Features
